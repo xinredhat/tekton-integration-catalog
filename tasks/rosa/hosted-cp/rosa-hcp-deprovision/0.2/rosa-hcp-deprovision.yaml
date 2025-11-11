@@ -96,9 +96,19 @@ spec:
         ROSA_TOKEN=$(jq -r '.aws["rosa-hcp"]["rosa-token"]' /usr/local/konflux-test-infra/$(params.cloud-credential-key))
 
         config_aws_creds() {
+            # Set HOME to a writable directory for any tools that might need it
+            export HOME=/tmp
+            mkdir -p /tmp/.aws
+            export AWS_CONFIG_FILE=/tmp/.aws/config
+            export AWS_SHARED_CREDENTIALS_FILE=/tmp/.aws/credentials
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
             aws configure set region "$REGION"
+        }
+
+        config_rosa_env() {
+            export HOME=/tmp
+            mkdir -p "$HOME/.config/ocm"
         }
 
         if [[ -n "$CLUSTER_NAME"  ]]; then
@@ -106,6 +116,7 @@ spec:
 
             printf "INFO: Logging in to your Red Hat account...\n"
             config_aws_creds
+            config_rosa_env
             rosa login --token="$ROSA_TOKEN"
 
             # Trigger the deletion of the cluster without waiting for it to be completely deleted
@@ -132,9 +143,16 @@ spec:
         ROSA_TOKEN=$(jq -r '.aws["rosa-hcp"]["rosa-token"]' /usr/local/konflux-test-infra/$(params.cloud-credential-key))
         SUBNET_IDS=$(jq -r '.aws["rosa-hcp"]["subnets-ids"]' /usr/local/konflux-test-infra/$(params.cloud-credential-key))
 
+        # Set HOME to a writable directory for any tools that might need it
+        export HOME=/tmp
+        mkdir -p /tmp/.aws
+        export AWS_CONFIG_FILE=/tmp/.aws/config
+        export AWS_SHARED_CREDENTIALS_FILE=/tmp/.aws/credentials
         aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
         aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
         aws configure set region "$REGION"
+
+        mkdir -p "$HOME/.config/ocm"
 
         echo "INFO: [$(date +"%Y/%m/%d %H:%M:%S")] Started to remove tags of cluster [$CLUSTER_NAME]..."
 
@@ -169,9 +187,16 @@ spec:
         AWS_ACCESS_KEY_ID=$(jq -r '.aws["access-key-id"]' /usr/local/konflux-test-infra/$(params.cloud-credential-key))
         AWS_SECRET_ACCESS_KEY=$(jq -r '.aws["access-key-secret"]' /usr/local/konflux-test-infra/$(params.cloud-credential-key))
 
+        # Set HOME to a writable directory for any tools that might need it
+        export HOME=/tmp
+        mkdir -p /tmp/.aws
+        export AWS_CONFIG_FILE=/tmp/.aws/config
+        export AWS_SHARED_CREDENTIALS_FILE=/tmp/.aws/credentials
         aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
         aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
         aws configure set region "$REGION"
+
+        mkdir -p "$HOME/.config/ocm"
 
         echo "INFO: [$(date +"%Y/%m/%d %H:%M:%S")] Started to remove load balancers of cluster [$CLUSTER_NAME]..."
 
